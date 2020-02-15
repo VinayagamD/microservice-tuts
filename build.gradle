@@ -22,6 +22,11 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-hateoas'
+    // https://mvnrepository.com/artifact/com.fasterxml.jackson.dataformat/jackson-dataformat-xml
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
+    runtimeOnly  'io.springfox:springfox-swagger2:2.9.2'
+    runtimeOnly  'io.springfox:springfox-swagger-ui:2.9.2'
+    runtimeOnly 'com.h2database:h2'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
