@@ -33,6 +33,14 @@ public class UserDoaService {
     }
 
     public User findOne(int id){
-       return users.stream().filter(user -> user.getId() == id).findAny().orElse(null);
+       return users.stream().filter(user -> user.getId() == id).findFirst().orElse(null);
+    }
+
+    public User deleteById(int id){
+        return users.stream().filter(user -> user.getId() == id).findFirst().map(user -> {
+            users.remove(user);
+            return user;
+        }).orElse(null);
+
     }
 }
