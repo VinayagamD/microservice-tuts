@@ -1,14 +1,15 @@
 package com.vinay.microservicetuts.resources;
 
 import com.vinay.microservicetuts.exceptions.UserNotFoundException;
+import com.vinay.microservicetuts.models.Post;
 import com.vinay.microservicetuts.models.User;
+import com.vinay.microservicetuts.repositories.PostRepository;
 import com.vinay.microservicetuts.repositories.UserRepository;
-import com.vinay.microservicetuts.services.UserDoaService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
@@ -18,9 +19,11 @@ import java.util.Optional;
 public class UserJPAResource {
 
     private final UserRepository repository;
+    private final PostRepository postRepository;
 
-    public UserJPAResource(UserRepository repository) {
+    public UserJPAResource(UserRepository repository, PostRepository postRepository) {
         this.repository = repository;
+        this.postRepository = postRepository;
     }
 
     // GET /users
@@ -65,5 +68,35 @@ public class UserJPAResource {
     @DeleteMapping("{id}")
     public void deleteUser(@PathVariable int id){
         repository.deleteById(id);
+    }
+
+    @GetMapping("{id}/posts")
+    public List<Post>  retrieveAllUsersPost(@PathVariable int id){
+         Optional<User> optionalUser = repository.findById(id);
+         if(!optionalUser.isPresent()){
+             throw new UserNotFoundException("id = " + id);
+         }
+         return optionalUser.get().getPosts();
+    }
+
+    //
+    // input - details of user
+    // output - CREATED & Return the created URI
+    @PostMapping("{id}/createPost")
+    @Transactional
+    public ResponseEntity<Object> createUserPost(@PathVariable int id, @RequestBody Post post){
+        Optional<User> optionalUser = repository.findById(id);
+        if(!optionalUser.isPresent()){
+            throw new UserNotFoundException("id = " + id);
+        }
+        post.setUser(optionalUser.get());
+        Post savedPost = postRepository.save(post);
+        // CREATED
+        // /users/{id} savedUser.getId()
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(post.getId()).toUri();
+        return ResponseEntity.created(location).build();
     }
 }
